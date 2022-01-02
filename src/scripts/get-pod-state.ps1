@@ -18,11 +18,22 @@ param (
     [Parameter(Mandatory = $false)][string]$podName = "local-kubernetes-execution" # Name of the pod for which the state is returned
 )
 # Convert to Csv 
-$pods = (kubectl get pods).Trim() -replace '\s{2,}', ',' | ConvertFrom-Csv
 
-$selectedPod = $pods | Where-Object NAME -eq "$podName" 
+& { $global:__podList_supressed__ = (kubectl get pods); } *>$null
 
-if ($null -eq $selectedPod) { return "NOTFOUND"; exit; }
+$podList = $global:__podList_supressed__;
+
+$notFound = "NOTFOUND";
+
+if (($null -eq $podList) -or (([string]$podlist).Length -eq 0)) {
+    return $notFound;exit;
+}
+
+$csvPods = $podList.Trim() -replace '\s{2,}', ',' | ConvertFrom-Csv
+
+$selectedPod = $csvPods | Where-Object NAME -eq "$podName" 
+
+if ($null -eq $selectedPod) { return $notFound; exit; }
 
 return $selectedPod.STATUS;
 

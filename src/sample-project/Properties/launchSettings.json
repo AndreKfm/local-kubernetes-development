@@ -12,7 +12,7 @@
       "commandLineArgs": "$(SolutionDir)../create-pod-and-run-app.ps1 -skipPodExistsCheck -skipPodCorrectMapping -skipBuild -skipDependencyCheck -configuration $(Configuration)",
       "remoteDebugEnabled": false
     },
-    "sample-project - Windows": {
+    "Sample-project - Windows": {
       "commandName": "Project"
     }
   }

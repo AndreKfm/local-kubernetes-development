@@ -24,7 +24,7 @@ param (
 # Generate temporary file to be used as target for patched template
 $tempFile = New-TemporaryFile
 
-$template = . $PSScriptRoot/patch-template.ps1 ./template/deploy-template.yaml ./sample-project/bin -mountPath $mountPath
+$template = . $PSScriptRoot/patch-template.ps1 $PSScriptRoot/../template/deploy-template.yaml $PSScriptRoot/../sample-project/bin -mountPath $mountPath
 Set-Content -Path $tempFile -Value $template
 
 kubectl apply -f $tempFile

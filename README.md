@@ -7,7 +7,7 @@ Sample project and scripts for Visual Studio Docker local Kubernetes development
 
 
  - Execute script in powershell: create-pod-and-run-app.ps1 in folder src
- - Or load Visual Studio solution src\sample-project\sample-project.sln and run
+ - Or load Visual Studio solution src\sample-project\sample-project.sln and run with CTRL-F5
 
 ## Description
 
