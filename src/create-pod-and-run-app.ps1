@@ -23,7 +23,7 @@ param (
     , [Parameter(Mandatory = $false)][switch]$skipPodExistsCheck      # If set will skip check for existing pod
     , [Parameter(Mandatory = $false)][switch]$skipPodCorrectMapping   # If set will skip check for pod using correct mapping
     , [Parameter(Mandatory = $false)][string]$mountPath = "/debug" # Path inside container, to which the compiled executable files are mapped
-    , [Parameter(Mandatory=$false)][string]$project = "$PSScriptRoot\sample-project\sample-project.csproj" # Project to build
+    , [Parameter(Mandatory = $false)][string]$project = "$PSScriptRoot\sample-project\sample-project.csproj" # Project to build
 )
 
 
@@ -32,8 +32,7 @@ function Remove-Pod($podName) {
     Write-Verbose "Deleted pod = $podName to use new mapping $mountPath"
 }
 
-function Test-Dependencies
-{
+function Test-Dependencies {
     if ($skipDependencyCheck -eq $false) {
         $dependencies = . $PSScriptRoot/scripts/check-dependencies.ps1
 
@@ -47,33 +46,30 @@ function Test-Dependencies
     }
 }
 
-function Get-PodStateAndTestValidMapping($podName)
-{
+function Get-PodStateAndTestValidMapping($podName) {
     if ($skipPodCorrectMapping -eq $false) {
         $state = . $PSScriptRoot/scripts/get-pod-state.ps1 $podName 
 
-    if ($state -eq "RUNNING") {
-        Write-Verbose "Testing for correct mount path $mountPath"
-        $testCommand = 'test -d ' + $mountPath + ' && echo "exist" || echo "not-found"';
-        $testExist = kubectl exec --stdin --tty $podName -- /bin/bash -c $testCommand;
-        Write-Verbose "$mountPath test result: $testExist"
-        if ($testExist -ne "exist") {
-            # The pod uses a different mapped folder - delete it and set state appropriately
-            Remove-Pod $podName;
-            $state = . $PSScriptRoot/scripts/get-pod-state.ps1 $podName;
+        if ($state -eq "RUNNING") {
+            Write-Verbose "Testing for correct mount path $mountPath"
+            $testCommand = 'test -d ' + $mountPath + ' && echo "exist" || echo "not-found"';
+            $testExist = kubectl exec --stdin --tty $podName -- /bin/bash -c $testCommand;
+            Write-Verbose "$mountPath test result: $testExist"
+            if ($testExist -ne "exist") {
+                # The pod uses a different mapped folder - delete it and set state appropriately
+                Remove-Pod $podName;
+                $state = . $PSScriptRoot/scripts/get-pod-state.ps1 $podName;
+            }
         }
-    }
         return $state;
     }
-    else 
-    { 
+    else { 
         return "RUNNING"; # Fake because skipped is activated 
-}
+    }
 
 }
 
-function Update-PodIfNecessaryCreateNew($podName, $state, $mountPath)
-{
+function Update-PodIfNecessaryCreateNew($podName, $state, $mountPath) {
     if ($skipPodExistsCheck -eq $false) {
         # Only redeploy if state is not running
         if ($state -ne "RUNNING") {
@@ -95,13 +91,12 @@ function Update-PodIfNecessaryCreateNew($podName, $state, $mountPath)
     }
 }
 
-function Build-Project($project, $configuration)
-{
+function Build-Project($project, $configuration) {
     if ($skipBuild -eq $false) {
         Write-Verbose "Calling build script: -project $project -configuration $configuration"
-        & { $output = . $PSScriptRoot/scripts/build-sample-project.ps1 -project $project -configuration $configuration } *>$null
-          Write-Verbose "Build result: $output"
-        }
+        & { $global:__output_suppressed__ = . $PSScriptRoot/scripts/build-sample-project.ps1 -project $project -configuration $configuration } *>$null
+        Write-Verbose "Build result: $global:__output_suppressed__"
+    }
 } 
 
 function Start-SampleProject($configuration, $podName, $mountPath) {
@@ -112,9 +107,9 @@ function Start-SampleProject($configuration, $podName, $mountPath) {
 function Main() {
 
     Test-Dependencies;
+    Build-Project $project $configuration
     $state = Get-PodStateAndTestValidMapping $podName;
     Update-PodIfNecessaryCreateNew $podName $state $mountPath;
-    Build-Project $project $configuration
     Start-SampleProject $configuration $podName $mountPath
 }
 
