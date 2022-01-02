@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "Run under Kubernetes": {
+      "commandName": "Executable",
+      "executablePath": "pwsh.exe",
+      "commandLineArgs": "$(SolutionDir)../create-pod-and-run-app.ps1 -skipBuild -configuration $(Configuration)",
+      "remoteDebugEnabled": false
+    },
+    "Fast run under Kubernetes (skip checks)": {
+      "commandName": "Executable",
+      "executablePath": "pwsh.exe",
+      "commandLineArgs": "$(SolutionDir)../create-pod-and-run-app.ps1 -skipPodExistsCheck -skipPodCorrectMapping -skipBuild -skipDependencyCheck -configuration $(Configuration)",
+      "remoteDebugEnabled": false
+    },
+    "sample-project - Windows": {
+      "commandName": "Project"
+    }
+  }
+}
