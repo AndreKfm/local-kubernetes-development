@@ -1,0 +1,30 @@
+# Used as template to create a new pod with local path mappings (for Docker only)
+# Variables which are replaced in final template are
+#
+#   *VOLUMENAME* - specifies the name of the volume which maps the Kubernetes path to a local directory and vice versa
+#   *COMMAND*    - command executed on pod startup which should run infite, will prevent Kubernetes from killing the pod 
+#   *MOUNTPATH*  - pod internal mapping path - under this path the host physical folder will be available inside the pod
+#   *HOSTPATH*   - host directory (drive name only one character - colon removed) to be mapped and visible inside the pod
+#
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+  name: local-kubernetes-execution
+spec:
+  volumes:
+  - name: *VOLUMENAME*volume
+    hostPath:
+      #Example for path:  /run/desktop/mnt/host/c/local-directory
+      path:  /run/desktop/mnt/host/*HOSTPATH*
+      type: Directory
+  containers:
+  - image: mcr.microsoft.com/dotnet/sdk:6.0-focal
+    imagePullPolicy: IfNotPresent
+    #Example for command: #["bash", "-c", "while sleep 5; do date;done"]
+    command: *COMMAND*  
+    name: dotnet-sdk
+    volumeMounts:
+    - mountPath: *MOUNTPATH* #/app
+      name: *VOLUMENAME*volume
